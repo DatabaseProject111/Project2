@@ -25,11 +25,8 @@ class Buyer(db_conn.DBConn):
             for book_id, count in id_and_count:
                 #新增游标
                 cursor = self.conn.cursor()
-                cursor.execute(
-                    "SELECT book_id, stock_level, book_info FROM \"store\" "
-                    "WHERE store_id = %s AND book_id = %s;",
-                    (store_id, book_id),
-                )
+                query = "SELECT book_id, stock_level, book_info FROM \"store\" WHERE store_id = %s AND book_id = %s;"
+                cursor.execute(query,(store_id, book_id))
                 row = cursor.fetchone()
                 cursor.close()
                 if row is None:
@@ -42,8 +39,8 @@ class Buyer(db_conn.DBConn):
 
                 if stock_level < count:
                     return error.error_stock_level_low(book_id) + (order_id,)
-
-                cursor = self.conn.execute(
+                cursor = self.conn.cursor()
+                cursor.execute(
                     "UPDATE \"store\" set stock_level = stock_level - %s "
                     "WHERE store_id = %s and book_id = %s and stock_level >= %s; ",
                     (count, store_id, book_id, count),
@@ -51,8 +48,7 @@ class Buyer(db_conn.DBConn):
                 if cursor.rowcount == 0:
                     cursor.close()
                     return error.error_stock_level_low(book_id) + (order_id,)
-
-                self.conn.execute(
+                cursor.execute(
                     "INSERT INTO \"new_order_detail\"(order_id, book_id, count, price) "
                     "VALUES(%s, %s, %s, %s);",
                     (uid, book_id, count, price),
@@ -137,11 +133,10 @@ class Buyer(db_conn.DBConn):
 
             if balance < total_price:
                 return error.error_not_sufficient_funds(order_id)
-            
+            cursor.close()
             cursor = conn.cursor()
             cursor.execute(
-                "UPDATE \"user\" SET balance = balance - %s"
-                "WHERE user_id = %s AND balance >= %s",
+                "UPDATE \"user\" SET balance = balance - %s WHERE user_id = %s AND balance >= %s",
                 (total_price, buyer_id, total_price),
             )
             if cursor.rowcount == 0:
@@ -149,7 +144,7 @@ class Buyer(db_conn.DBConn):
                 return error.error_not_sufficient_funds(order_id)
 
             cursor.execute(
-                "UPDATE \"user\" SET balance = balance + %s" "WHERE user_id = %s",
+                "UPDATE \"user\" SET balance = balance + %s WHERE user_id = %s",
                 (total_price, seller_id),
             )
 
