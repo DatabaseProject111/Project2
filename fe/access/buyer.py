@@ -48,3 +48,45 @@ class Buyer:
         headers = {"token": self.token}
         r = requests.post(url, headers=headers, json=json)
         return r.status_code
+     
+     #添加收货功能
+    def receive_order(self, order_id: str) -> (int, str):
+        json = {"user_id": self.user_id, "order_id": order_id}
+        url = urljoin(self.url_prefix, "receive_order")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
+        return r.status_code
+    
+    # 添加自动取消订单功能
+    def cancel_timeout_orders(self):
+        url = urljoin(self.url_prefix, "cancel_timeout_orders")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers)
+        return r.status_code
+
+    # 添加取消订单功能
+    def cancel_order(self, order_id: str) -> (int, str):
+        json = {"order_id": order_id}
+        url = urljoin(self.url_prefix, "cancel_order")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
+        return r.status_code
+    
+    # # P改的：通常情况下，订单状态查询和订单状态功能不需要用户的密码。这些功能仅涉及与订单相关的操作，而不涉及用户的身份验证或安全敏感信息。因此，可以在这两个方法中省略密码参数。
+    # 添加订单状态功能
+    
+    def order_status(self, order_id: str) -> (int, str):
+        json = {"order_id": order_id}
+        url = urljoin(self.url_prefix, "order_status")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
+        response_json = r.json()
+        return r.status_code
+
+    #用于订单查询的超时
+    def query_order(self, order_id: str) -> (int, str):
+        json = {"order_id": order_id}
+        url = urljoin(self.url_prefix, "query_order")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
+        return r.status_code
