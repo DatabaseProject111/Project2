@@ -60,7 +60,9 @@ class Store:
                 CREATE TABLE IF NOT EXISTS "new_order" (
                     order_id TEXT PRIMARY KEY, 
                     user_id TEXT, 
-                    store_id TEXT
+                    store_id TEXT,
+                    status TEXT,
+                    order_date DATE
                 );
                 """
             )
@@ -76,6 +78,23 @@ class Store:
                 );
                 """
             )
+            
+            
+            # 添加shipping表  user_id, store_id, book_id, quantity, shipping_date
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS "shipping" (
+                    user_id TEXT, 
+                    store_id TEXT, 
+                    order_id TEXT, 
+                    book_id TEXT, 
+                    quantity INTEGER, 
+                    shipping_date DATE,  
+                    PRIMARY KEY (order_id)
+                );
+                """
+            )
+            
             conn.commit()
             cursor.close()
             # conn.close()

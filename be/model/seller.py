@@ -120,7 +120,7 @@ class Seller(db_conn.DBConn):
             cursor = self.conn.cursor()
             cursor.execute(
                 "UPDATE \"store\" SET stock_level = stock_level + %s WHERE store_id = %s AND book_id = %s",
-                (add_stock_level, store_id, book_id),
+                (add_stock_level, store_id, book_id,),
             )
             self.conn.commit()
             cursor.close()
@@ -142,7 +142,7 @@ class Seller(db_conn.DBConn):
             cursor = self.conn.cursor()
             cursor.execute(
                 "INSERT INTO \"user_store\" (store_id, user_id) VALUES (%s, %s)",
-                (store_id, user_id),
+                (store_id, user_id,)
             )
             self.conn.commit()
             cursor.close()
@@ -158,10 +158,9 @@ class Seller(db_conn.DBConn):
     # 添加发货功能
 
    # 添加发货功能
-    def ship_books(self, user_id: str, store_id: str, book_id: str, quantity: int):
+    def ship_books(self, book_id: str, store_id: str, order_id: str, quantity: int):
         try:
-            if not self.user_id_exist(user_id):
-                return error.error_non_exist_user_id(user_id)
+
             if not self.store_id_exist(store_id):
                 return error.error_non_exist_store_id(store_id)
 
@@ -169,42 +168,42 @@ class Seller(db_conn.DBConn):
             
             # 检查订单状态
             cursor.execute(
-                "SELECT status FROM \"order\" WHERE store_id = %s AND book_id = %s",
-                (store_id, book_id)
+                "SELECT status FROM \"new_order\" WHERE store_id = %s",
+                (store_id,)
             )
             order_info = cursor.fetchone()
             if order_info is None or order_info[0] != 'paid':
-                return error.error_invalid_order_id()
+                return error.error_invalid_order_id(order_id)
 
             # 检查库存是否足够
             cursor.execute(
                 "SELECT stock_level FROM \"store\" WHERE store_id = %s AND book_id = %s",
-                (store_id, book_id)
+                (store_id, book_id,)
             )
             store_info = cursor.fetchone()
             if store_info is None:
-                return error.error_non_exist_book_id(book_id)
+                return error.error_invalid_order_id(order_id)
 
             current_stock = store_info[0]
             if current_stock < quantity:
-                return error.error_not_sufficient_funds(book_id)
+                return error.error_invalid_order_id(order_id)
 
             # 更新库存
             new_stock_level = current_stock - quantity
             cursor.execute(
                 "UPDATE \"store\" SET stock_level = %s WHERE store_id = %s AND book_id = %s",
-                (new_stock_level, store_id, book_id)
+                (new_stock_level, store_id, book_id,)
             )
 
             # 记录发货信息
             cursor.execute(
-                "INSERT INTO \"shipping\" (user_id, store_id, book_id, quantity, shipping_date) VALUES (%s, %s, %s, %s, %s)",
-                (user_id, store_id, book_id, quantity, datetime.datetime.now())
+                "INSERT INTO \"shipping\" (store_id, order_id, book_id, quantity, shipping_date) VALUES (%s, %s, %s, %s, %s, %s)",
+                (store_id, order_id, book_id, quantity, datetime.datetime.now(),)
             )
 
             self.conn.commit()
             cursor.close()
+
         except psycopg2.Error as e:
-            self.conn.rollback()
             return 528, "{}".format(str(e))
         return 200, "ok"

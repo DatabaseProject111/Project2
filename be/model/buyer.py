@@ -23,6 +23,7 @@ class Buyer(db_conn.DBConn):
             if not self.store_id_exist(store_id):
                 return error.error_non_exist_store_id(store_id) + (order_id,)
             uid = "{}_{}_{}".format(user_id, store_id, str(uuid.uuid1()))
+            
 
             for book_id, count in id_and_count:
                 #新增游标
@@ -65,7 +66,7 @@ class Buyer(db_conn.DBConn):
             )
             self.conn.commit()
             cursor.close()
-            # order_id = uid
+            order_id = uid
             # order_col = self.db["new_order"]
             # # 添加订单状态-代付款
             # # 默认订单状态为待付款
@@ -227,8 +228,9 @@ class Buyer(db_conn.DBConn):
     
     
      # 添加收货功能
-    def receive_order(self, user_id: str, order_id: str) -> (int, str):
+    def receive_order(self, order_id: str, user_id: str) -> (int, str):
         try:
+
             # 检查订单是否存在
             cursor = self.conn.cursor()
             cursor.execute(
@@ -238,10 +240,10 @@ class Buyer(db_conn.DBConn):
             if row is None:
                 return error.error_invalid_order_id(order_id)
             # 检查用户是否为订单所有者
-            if row[0] != user_id:
+            if row[1] != user_id:
                 return error.error_authorization_fail()
 
-            if row[1] != 'paid':
+            if row[3] != 'paid':
                 return error.error_order_status()
            # 更新订单状态为已收货
             cursor.execute(
@@ -252,9 +254,10 @@ class Buyer(db_conn.DBConn):
 
             self.conn.commit()
             cursor.close()
+            order_id = uid
             # if result.modified_count == 0:
             #     return error.error_invalid_order_id(order_id)
-
+            
         except psycopg2.Error as e:
             return 528, "{}".format(str(e))
         return 200, "ok"
@@ -262,6 +265,7 @@ class Buyer(db_conn.DBConn):
     # 添加定时任务来取消超时订单
     def cancel_timeout_orders(self):
         try:
+            
             # 获取当前时间
             current_time = datetime.now(pytz.timezone('UTC'))
 
@@ -283,6 +287,7 @@ class Buyer(db_conn.DBConn):
 
             cursor.close()
             self.conn.commit()
+            
             # order_col = self.db["new_order"]
             # unpaid_orders = order_col.find({"status": "unpaid"})
 
@@ -387,12 +392,12 @@ class Buyer(db_conn.DBConn):
             row = cursor.fetchone()
             cursor.close()
             if row is None:
-                return error.error_invalid_order_id(order_id)
+                return json.dumps({"code": error.INVALID_ORDER_ID_CODE, "message": f"Invalid order id: {order_id}"})
 
             status = row[0]
         except psycopg2.Error as e:
-            return 528, "{}".format(str(e))
-        return 200, "ok"
+            return json.dumps({"code": 528, "message": str(e)})
+        return json.dumps({"code": 200, "message": "ok"})
     
     
     #添加订单查询功能
