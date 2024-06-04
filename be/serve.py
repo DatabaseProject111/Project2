@@ -28,7 +28,17 @@ def be_run():
     this_path = os.path.dirname(__file__)
     parent_path = os.path.dirname(this_path)
     log_file = os.path.join(parent_path, "app.log")
-    init_database(parent_path)
+    # init_database(parent_path)p
+    # init_database(db_params)
+    db_params = {
+        'dbname': 'bookstore',
+        'user': 'postgres',
+        'password': 'zzh0117.',
+        'host': '127.0.0.1',
+        'port': '5432'
+    }
+    dsn = " ".join([f"{key}={value}" for key, value in db_params.items()])  # 将字典转换为连接字符串
+    init_database(dsn)  # 使用连接字符串初始化数据库
 
     logging.basicConfig(filename=log_file, level=logging.ERROR)
     handler = logging.StreamHandler()
