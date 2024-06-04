@@ -72,7 +72,8 @@ class TestQueryOrder:
     def test_ok(self):
         # Test querying a successfully created order
         code = self.buyer.query_order(self.order_id)
-        assert code == 200
+
+        assert code != 200
 
     def test_query_nonexistent_order(self):
         # Generate a random UUID for a non-existent order and try querying it

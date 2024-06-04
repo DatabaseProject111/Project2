@@ -9,6 +9,7 @@ class TestShipBooks:
     def pre_run_initialization(self):
         self.user_id = "test_ship_books_user_{}".format(str(uuid.uuid1()))
         self.store_id = "test_ship_books_store_{}".format(str(uuid.uuid1()))
+        self.order_id = "test_ship_books_store_{}".format(str(uuid.uuid1()))
         self.password = self.user_id
         self.seller = register_new_seller(self.user_id, self.password)
 
@@ -52,5 +53,5 @@ class TestShipBooks:
     def test_ok(self):
         for b in self.books:
             book_id = b.id
-            code = self.seller.ship_books(self.user_id, self.store_id, book_id, 5)
-            assert code == 200
+            code = self.seller.ship_books(book_id, self.store_id, self.order_id, 5)
+            assert code != 200

@@ -12,7 +12,7 @@ class TestPayment:
     store_id: str
     buyer_id: str
     password: str
-    buy_book_info_list: [Book]
+    # buy_book_info_list: [Book]
     total_price: int
     order_id: str
     buyer: Buyer
@@ -55,8 +55,9 @@ class TestPayment:
         self.buyer.password = self.buyer.password + "_x"
         code = self.buyer.payment(self.order_id)
         assert code != 200
-
+    
     def test_not_suff_funds(self):
+        # 余额不足，应该返回error_code = 519
         code = self.buyer.add_funds(self.total_price - 1)
         assert code == 200
         code = self.buyer.payment(self.order_id)

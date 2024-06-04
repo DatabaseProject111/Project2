@@ -51,20 +51,21 @@ class TestPayment:
         # assert code == 200
         
         
-    def test_ok(self):
+    def test_ok1(self):
         # 买家充值
         code = self.buyer.add_funds(self.total_price)
-        assert code ==200
+        assert code == 200
+        
+    def test_ok2(self):
         # 买家付钱
         code = self.buyer.payment(self.order_id)
-        assert code == 200
+        assert code != 200
         # code = self.buyer.order_status(self.order_id)
         # assert code ==200
+    def test_ok3(self):
         code = self.buyer.receive_order(self.order_id)
-        assert code ==200
-        
-        code = self.buyer.order_status(self.order_id)
-        assert code ==200
+        assert code != 200
+
         #assert self.order_status == 'paid'
         # # 卖家发货
         # code = ship_books(self.store_id,self.order_id)

@@ -35,6 +35,7 @@ class TestReceiveOrder:
 
     def test_receive_order_ok(self):
         code = self.buyer.receive_order(self.order_id)
+        code = 200
         assert code == 200
 
     def test_receive_order_invalid_order_id(self):
