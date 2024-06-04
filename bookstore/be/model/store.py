@@ -57,10 +57,13 @@ class Store:
 
             cursor.execute(
                 """
+                DROP TABLE IF EXISTS "new_order";
                 CREATE TABLE IF NOT EXISTS "new_order" (
                     order_id TEXT PRIMARY KEY, 
                     user_id TEXT, 
-                    store_id TEXT
+                    store_id TEXT,
+                    status TEXT,
+                    order_date DATE
                 );
                 """
             )
